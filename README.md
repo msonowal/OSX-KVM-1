@@ -7,7 +7,7 @@ Note: All blobs and resources included in this repository are re-derivable (all
 instructions are included!).
 
 :green_heart: Looking for **commercial** support with this stuff? I am [available
-over email](mailto:dhiru.kholia@gmail.com?subject=[GitHub]%20OSX-KVM%20Commercial%20Support%20Request&body=Hi%20-%20We%20are%20interested%20in%20purchasing%20commercial%20support%20options%20for%20your%20project.) for a chat for **commercial support options only**.
+over email](mailto:dhiru.kholia@gmail.com?subject=[GitHub]%20OSX-KVM%20Commercial%20Support%20Request&body=Hi%20-%20We%20are%20interested%20in%20purchasing%20commercial%20support%20options%20for%20your%20project.) for a chat for **commercial support options only**. Note: Project sponsors get access to the `Private OSX-KVM` repository, and direct support.
 
 Working with `Proxmox` and macOS? See [Nick's blog for sure](https://www.nicksherlock.com/).
 
@@ -45,7 +45,7 @@ help (pull-requests!) with the following work items:
 
 * QEMU >= 4.2.0
 
-* A CPU with Intel VT-x / AMD SVM support is required (`egrep '(vmx|svm)' /proc/cpuinfo`)
+* A CPU with Intel VT-x / AMD SVM support is required (`grep -e vmx -e svm /proc/cpuinfo`)
 
 * A CPU with SSE4.1 support is required for >= macOS Sierra
 
@@ -73,16 +73,19 @@ Phenom II X3 720 does not. Ryzen processors work just fine.
 
   ```
   sudo apt-get install qemu uml-utilities virt-manager git \
-      wget libguestfs-tools p7zip-full -y
+      wget libguestfs-tools p7zip-full make -y
   ```
 
   This step may need to be adapted for your Linux distribution.
 
-* Add user to the `kvm` group (might be needed).
+* Add user to the `kvm` and `libvirt` groups (might be needed).
 
   ```
   sudo usermod -aG kvm $(whoami)
+  sudo usermod -aG libvirt $(whoami)
   ```
+
+  Note: Re-login after executing this command.
 
 * Clone this repository on your QEMU system. Files from this repository are
   used in the following steps.
@@ -95,18 +98,26 @@ Phenom II X3 720 does not. Ryzen processors work just fine.
   cd OSX-KVM
   ```
 
+  Repository updates can be pulled via the following command:
+
+  ```
+  git pull --rebase
+  ```
+
+  This repository uses rebase based workflows heavily.
+
 * Fetch macOS installer.
 
   ```
   ./fetch-macOS-v2.py
   ```
 
-  ATTENTION: Installing `Big Sur` is NOT recommended at this time, unless you
-  are a Hackintosh developer! Let the `Big Sur` setup sit at the `Country
-  Selection` screen and other similar places for a while ;)
-
   You can choose your desired macOS version here. After executing this step,
   you should have the `BaseSystem.dmg` file in the current folder.
+
+  ATTENTION: Let `>= Big Sur` setup sit at the `Country Selection` screen, and
+  other similar places for a while if things are being slow. The initial macOS
+  setup wizard will eventually succeed.
 
   Sample run:
 
@@ -114,14 +125,15 @@ Phenom II X3 720 does not. Ryzen processors work just fine.
   $ ./fetch-macOS-v2.py
   1. High Sierra (10.13)
   2. Mojave (10.14)
-  3. Catalina (10.15) - RECOMMENDED
-  4. Latest (Big Sur - 11)
+  3. Catalina (10.15)
+  4. Big Sur (11.6) - RECOMMENDED
+  5. Monterey (latest)
 
-  Choose a product to download (1-4): 3
+  Choose a product to download (1-5):
   ```
 
   Note: Modern NVIDIA GPUs are supported on HighSierra but not on later
-  versions.
+  versions of macOS.
 
 * Convert the downloaded `BaseSystem.dmg` file into the `BaseSystem.img` file.
 
@@ -155,6 +167,8 @@ Phenom II X3 720 does not. Ryzen processors work just fine.
 
 - You are all set! 🙌
 
+- TIP: Using a non-APFS filesystem is recommended.
+
 - (OPTIONAL) Use this macOS VM disk with libvirt (virt-manager / virsh stuff).
 
   - Edit `macOS-libvirt-Catalina.xml` file and change the various file paths (search
@@ -173,10 +187,14 @@ Phenom II X3 720 does not. Ryzen processors work just fine.
     virsh --connect qemu:///system define macOS.xml
     ```
 
-  - Launch `virt-manager` and start the `macOS` virtual machine.
+  - If needed, grant necessary permissions to libvirt-qemu user,
 
-    Note: You may need to run `sudo ip link delete tap0` command before
-    `virt-manager` is able to start the `macOS` VM.
+    ```
+    sudo setfacl -m u:libvirt-qemu:rx /home/$USER
+    sudo setfacl -R -m u:libvirt-qemu:rx /home/$USER/OSX-KVM
+    ```
+
+  - Launch `virt-manager` and start the `macOS` virtual machine.
 
 
 ### Setting Expectations Right
@@ -186,7 +204,7 @@ for a variety of purposes (e.g. software builds, testing, reversing work), and
 it may be all you need, along with some tweaks documented in this repository.
 
 However, such a system lacks graphical acceleration, a reliable sound sub-system,
-USB (3) functionality and other similar things. To enable these things, take a
+USB 3 functionality and other similar things. To enable these things, take a
 look at our [notes](notes.md). We would like to resume our testing and
 documentation work around this area. Please [reach out to us](mailto:dhiru.kholia@gmail.com?subject=[GitHub]%20OSX-KVM%20Funding%20Support)
 if you are able to fund this area of work.
@@ -216,11 +234,13 @@ work, patience, and a bit of luck (perhaps?).
   Ubuntu versions. Check out the [notes](notes.md) included in this repository
   for details.
 
-* To passthrough GPUs and other devices, see [these notes](notes.md).
+* To passthrough GPUs and other devices, see [these notes](notes.md#gpu-passthrough-notes).
 
-* Need a different resolution? Check out the [notes](notes.md) included in this repository.
+* Need a different resolution? Check out the [notes](notes.md#change-resolution-in-opencore) included in this repository.
 
-* Trouble with iMessage? Check out the [notes](notes.md) included in this repository.
+* Trouble with iMessage? Check out the [notes](notes.md#trouble-with-imessage) included in this repository.
+
+* Highly recommended macOS tweaks - https://github.com/sickcodes/osx-optimizer
 
 
 ### Is This Legal?
@@ -233,6 +253,12 @@ Gabriel Somlo also has [some thoughts](http://www.contrib.andrew.cmu.edu/~somlo/
 
 You may also find [this 'Announcing Amazon EC2 Mac instances for macOS' article](https://aws.amazon.com/about-aws/whats-new/2020/11/announcing-amazon-ec2-mac-instances-for-macos/
 ) interesting.
+
+Note: It is your responsibility to understand, and accept (or not accept) the
+Apple EULA.
+
+Note: This is not legal advice, so please make the proper assessments yourself
+and discuss with your lawyers if you have any concerns (Text credit: Dortania)
 
 
 ### Motivation

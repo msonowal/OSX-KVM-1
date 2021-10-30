@@ -2,6 +2,8 @@
 
 - [UPSTREAM] https://github.com/acidanthera/OpenCorePkg + https://dortania.github.io/ - for making all this possible!
 
+- [UPSTREAM] https://github.com/thenickdude/KVM-Opencore - Thanks Nick!
+
 * RehabMan, th3joker and others - FakeSMC.kext, https://bitbucket.org/RehabMan
 
 * Chuck Remes (chuckremes) - better documentation
@@ -117,5 +119,13 @@
 - mikkeyboi - Unraid OS stuff
 
 - deftdawg - Various correctness and robustness fixes - thanks!
+
+- sickcodes - Keep being awesome ;)
+
+- Kian Kasad (kdkasad) - Use grep instead of egrep
+
+- https://github.com/cclauss - Typo fix
+
+- https://github.com/thiagokokada - Makefile to improve usability
 
 Note: Individual files have more specific 'credits' in them.
